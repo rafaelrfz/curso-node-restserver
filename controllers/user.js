@@ -2,17 +2,28 @@ const { response, request } = require('express')
 const User = require('../models/user')
 const bcryptjs = require('bcryptjs');
 
-const usuariosGet = (req, res = response) =>{
+const usuariosGet = async(req, res = response) =>{
 
-    const {q, nombre = "No Name", apikey, page = 1, limit} = req.query;
+    //const {q, nombre = "No Name", apikey, page = 1, limit} = req.query;
+    const { limit = 5, since = 0 } = req.query;
+    const query =  {status:true}
+
+    // const users = await User.find( query )
+    //     .skip((since==Number))
+    //     .limit((limit==Number));
+
+    // const total = await User.countDocuments(query);
+
+    const [total, users ] = await Promise.all([
+        User.countDocuments(query),
+        User.find( query )
+        .skip((since==Number))
+        .limit((limit==Number))
+    ])
+
     res.json({
-        //ok: true,
-        msg: 'get API - controlador',
-        q,
-        nombre,
-        apikey,
-        page,
-        limit
+        total,
+        users
     })
 }
 
@@ -40,14 +51,21 @@ const usuariosPost = async (req, res = response) =>{
     })
 }
 
-const usuariosPut = (req, res) =>{
-    const {id} = req.params;
+const usuariosPut = async (req, res) =>{
 
-    res.json({
-        //ok: true,
-        msg: 'put API - controlador',
-        id: id
-    })
+    const {id} = req.params;
+    const { _id, password, google, ...rest } = req.body;
+
+    //TODO validar contra base de datos
+    if(password){
+        //Encriptar la contraseña
+        const salt = bcryptjs.genSaltSync();
+        rest.password = bcryptjs.hashSync(password, salt);
+    }
+
+    const userBD = await User.findByIdAndUpdate( id, rest );
+
+    res.json(userBD);
 }
 
 const usuariosPatch = (req, res) =>{
