@@ -19,6 +19,7 @@ router.post('/', [
         //check('email', 'El correo no es válido').isEmail(),
         check('email').custom(emailExists),
         //check('role', 'No es un rol válido').isIn(['ADMIN_ROLE', 'USER_ROLE']),
+        //prueba git
         check('role').custom( isValidRole ),
         validateFields
 ], usuariosPost)
