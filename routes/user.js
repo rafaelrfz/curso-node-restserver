@@ -28,8 +28,12 @@ router.put('/:id', [
         check('role').custom( isValidRole ),
         validateFields
 ], usuariosPut)
-router.patch('/', usuariosPatch )
-router.delete('/', usuariosDelete )
+router.patch('/',usuariosPatch )
+router.delete('/:id', [
+        check('id', 'No es un ID válido').isMongoId(),
+        check('id').custom(userExistById),
+        validateFields
+], usuariosDelete )
 
 
 
